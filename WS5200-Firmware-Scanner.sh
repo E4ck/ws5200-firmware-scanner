@@ -1,24 +1,24 @@
 #!/bin/bash
 
-echo -e "\n#### 可以公开的情报(本地固件版本) #####"
+echo -e "\n#### Information that can be exposed (local firmware version) #####"
 localVer=`ls -l $(pwd)/xml/* |awk '{print $9}'| tr -d -c '0-9 \n'`
 echo $localVer
 workpath=$(pwd)
 latestVer=`echo $localVer | rev | cut -d ' ' -f 1 |rev`
 # add=9999
 # lastVer=`expr $latestVer + $add`
-echo -e "\n[+]是否去云端获取最新情报(y/n)"
+echo -e "\n[+]Whether to go to the cloud to get the latest intelligence(y/n)"
 read g
 
 if [ $g == "y" ];then
-    echo "[-]请输入开始查询的版本号（推荐从 $latestVer 开始）："
+    echo "[-]Please enter the version number to start the query（Recommended from $latestVer）："
     read v
-    echo "[-]请输入结束查询的版本号:"
+    echo "[-]Please enter the version number of the end of the query:"
     read e
     for ((var=$v;var<$e;var++))
     do
         clear
-        echo  [*]正在查询版本 $var，若想终止直接关闭窗口
+        echo  "[*]Querying the version $var，Close the window directly if you want to terminate"
         curl http://update.hicloud.com/TDS/data/files/p14/s145/G4084/g1810/v$var/f1/changelog.xml > $(pwd)/xml/$var.xml
         filesize=`ls -l $(pwd)/xml/$var.xml | awk '{ print $5 }'`
         if [[ $filesize == '162'  || $filesize == '0' ]]
@@ -27,18 +27,18 @@ if [ $g == "y" ];then
             rm $(pwd)/xml/$var.xml
         fi
     done
-    echo -e "\n####更新之后的本地固件版本####"
+    echo -e "\n####Updated local firmware version####"
     localVer=`ls -l $(pwd)/xml/* |awk '{print $9}'| tr -d -c '0-9 \n'`
 fi
 
 
 while true
 do
-    echo -e "\n####可以公开的情报(本地固件版本)####\n"
+    echo -e "\n####Information that can be exposed (local firmware version)####\n"
     echo $localVer
-    echo -e "\n[+]请输入要下载的固件版本\n"
+    echo -e "\n[+]Please enter the firmware version you want to download\n"
     read version
-    echo "--------固件v$version相关信息如下-------"
+    echo "--------Devicev$version related information-------"
     cat $(pwd)/xml/$version.xml
     verID=`cat $(pwd)/xml/$version.xml|awk '{print $2 $3}'|cut -d '=' -f 4|tr -d -c '0-9 .'`
     download_url="http://update.hicloud.com/TDS/data/files/p14/s145/G4084/g1810"
@@ -46,11 +46,11 @@ do
     filename2="Hi5651h-1151-ToC_"$verID"_main.bin"
     mainbin="$download_url/v$version/f1/$filename1"
     tocbin="$download_url/v$version/f1/$filename2"
-    echo "[-]下载地址"
+    echo "[-]Download address"
     echo $mainbin
     echo $tocbin
-    echo -e "\n[*]开始下载固件....."
+    echo -e "\n[*]Start Download....."
     wget $mainbin -P "${workpath}/bin/"
     wget $tocbin -P "${workpath}/bin/"
-    echo "[^_^]下载完成！"
+    echo "[^_^]Download completed！"
 done
